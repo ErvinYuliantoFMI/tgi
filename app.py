@@ -13,6 +13,7 @@ import uuid
 from datetime import date
 
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -133,6 +134,15 @@ st.sidebar.caption(f"Sumber data: folder `data/` (CSV)")
 # Halaman: Dashboard
 # ---------------------------------------------------------------------------
 
+CHART_LAYOUT = dict(
+    plot_bgcolor="white",
+    paper_bgcolor="white",
+    font=dict(family="Arial, sans-serif", color="#1C2B33", size=12),
+    margin=dict(l=10, r=10, t=30, b=10),
+    height=320,
+)
+
+
 def page_dashboard():
     st.title("Dashboard")
     st.caption("Ringkasan pesanan dan stock gudang")
@@ -140,6 +150,7 @@ def page_dashboard():
     orders = load_orders()
     products = load_products()
     customers = load_customers()
+    order_items = load_order_items()
 
     total_pesanan = len(orders)
     stock_tersedia = int(products["stock"].sum())
@@ -151,36 +162,99 @@ def page_dashboard():
         st.metric("Stock Tersedia", f"{stock_tersedia:,} unit".replace(",", "."))
 
     st.write("")
-    left, right = st.columns([2, 1])
+    row1_left, row1_right = st.columns(2)
 
-    with left:
-        st.subheader("Pesanan Terbaru")
+    # --- Grafik: Pesanan per Status ---------------------------------------
+    with row1_left:
+        st.subheader("Pesanan per Status")
         if orders.empty:
             st.info("Belum ada pesanan.")
         else:
-            recent = orders.merge(
-                customers[["customer_id", "name"]], on="customer_id", how="left"
-            ).sort_values("order_date", ascending=False).head(5)
-            show = recent[["order_id", "name", "order_date", "status"]].rename(
-                columns={"order_id": "No. Pesanan", "name": "Customer",
-                         "order_date": "Tanggal", "status": "Status"}
+            status_counts = (
+                orders["status"].value_counts().reindex(STATUSES, fill_value=0)
+                .reset_index()
             )
-            st.dataframe(show, hide_index=True, use_container_width=True)
+            status_counts.columns = ["status", "jumlah"]
+            fig = px.bar(
+                status_counts, x="status", y="jumlah", color="status",
+                color_discrete_map=STATUS_COLOR, text="jumlah",
+            )
+            fig.update_traces(textposition="outside", showlegend=False)
+            fig.update_layout(
+                **CHART_LAYOUT, showlegend=False,
+                xaxis_title=None, yaxis_title="Jumlah Pesanan",
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
-    with right:
-        st.subheader("Stock Menipis")
-        low = products.sort_values("stock").head(5)
-        for _, row in low.iterrows():
-            color = "#A3402E" if row["stock"] < 200 else "#1C2B33"
-            st.markdown(
-                f"""<div style="display:flex;justify-content:space-between;
-                    padding:6px 0;border-top:1px solid #EFEBE0;font-size:14px;">
-                    <span>{row['name']}</span>
-                    <span style="color:{color};font-family:monospace;">
-                        {row['stock']} {row['unit']}</span>
-                    </div>""",
-                unsafe_allow_html=True,
+    # --- Grafik: Trend Pesanan Harian --------------------------------------
+    with row1_right:
+        st.subheader("Trend Pesanan Harian")
+        if orders.empty:
+            st.info("Belum ada pesanan.")
+        else:
+            trend = orders.groupby("order_date").size().reset_index(name="jumlah")
+            trend["order_date"] = pd.to_datetime(trend["order_date"])
+            trend = trend.sort_values("order_date")
+            fig = px.line(trend, x="order_date", y="jumlah", markers=True)
+            fig.update_traces(line_color="#2C5F8A", marker=dict(size=8, color="#2C5F8A"))
+            fig.update_layout(
+                **CHART_LAYOUT, xaxis_title=None, yaxis_title="Jumlah Pesanan",
             )
+            st.plotly_chart(fig, use_container_width=True)
+
+    row2_left, row2_right = st.columns(2)
+
+    # --- Grafik: Stock per Barang -------------------------------------------
+    with row2_left:
+        st.subheader("Stock per Barang")
+        if products.empty:
+            st.info("Belum ada data barang.")
+        else:
+            stock_df = products[["name", "stock"]].sort_values("stock")
+            colors = ["#A3402E" if s < 200 else "#1F6F5C" for s in stock_df["stock"]]
+            fig = px.bar(
+                stock_df, x="stock", y="name", orientation="h", text="stock",
+            )
+            fig.update_traces(marker_color=colors, textposition="outside")
+            fig.update_layout(
+                **CHART_LAYOUT, xaxis_title="Stock", yaxis_title=None,
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+    # --- Grafik: Item Terlaris ----------------------------------------------
+    with row2_right:
+        st.subheader("Item Terlaris (berdasarkan Qty Dipesan)")
+        if order_items.empty:
+            st.info("Belum ada item pesanan.")
+        else:
+            item_qty = (
+                order_items.groupby("product_id")["qty"].sum().reset_index()
+                .merge(products[["product_id", "name"]], on="product_id", how="left")
+                .sort_values("qty", ascending=False).head(5)
+            )
+            fig = px.bar(
+                item_qty, x="name", y="qty", text="qty",
+                color_discrete_sequence=["#D98E2C"],
+            )
+            fig.update_traces(textposition="outside")
+            fig.update_layout(
+                **CHART_LAYOUT, xaxis_title=None, yaxis_title="Total Qty Dipesan",
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+    st.write("")
+    st.subheader("Pesanan Terbaru")
+    if orders.empty:
+        st.info("Belum ada pesanan.")
+    else:
+        recent = orders.merge(
+            customers[["customer_id", "name"]], on="customer_id", how="left"
+        ).sort_values("order_date", ascending=False).head(5)
+        show = recent[["order_id", "name", "order_date", "status"]].rename(
+            columns={"order_id": "No. Pesanan", "name": "Customer",
+                     "order_date": "Tanggal", "status": "Status"}
+        )
+        st.dataframe(show, hide_index=True, use_container_width=True)
 
 
 # ---------------------------------------------------------------------------
