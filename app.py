@@ -617,29 +617,111 @@ def _img_b64(path: str) -> str:
 def page_profil_perusahaan():
     logo_b64 = _img_b64(LOGO_PATH) if os.path.exists(LOGO_PATH) else ""
 
+    # Ilustrasi vektor asli (bukan foto) — potongan daging di atas talenan kayu,
+    # dipakai sebagai elemen visual hero agar tidak hanya berupa teks.
+    steak_svg = """
+    <svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="woodGrad" cx="50%" cy="45%" r="65%">
+                <stop offset="0%" stop-color="#D9A066"/>
+                <stop offset="55%" stop-color="#B87B3F"/>
+                <stop offset="100%" stop-color="#8C5A2B"/>
+            </radialGradient>
+            <linearGradient id="meatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#A5324A"/>
+                <stop offset="55%" stop-color="#7A1F30"/>
+                <stop offset="100%" stop-color="#571522"/>
+            </linearGradient>
+        </defs>
+
+        <circle cx="260" cy="260" r="235" fill="url(#woodGrad)"/>
+        <circle cx="260" cy="260" r="235" fill="none" stroke="#FBAF43" stroke-width="4" opacity="0.55"/>
+        <circle cx="260" cy="260" r="205" fill="none" stroke="#7A4A22" stroke-width="1.5" opacity="0.25"/>
+        <circle cx="260" cy="260" r="170" fill="none" stroke="#7A4A22" stroke-width="1.5" opacity="0.2"/>
+        <circle cx="260" cy="260" r="135" fill="none" stroke="#7A4A22" stroke-width="1.5" opacity="0.18"/>
+
+        <circle cx="260" cy="260" r="188" fill="#26262B"/>
+        <circle cx="260" cy="260" r="188" fill="none" stroke="#3A3A40" stroke-width="2"/>
+
+        <path d="M175,150 C140,190 130,250 150,300 C165,340 205,375 255,385
+                 C300,393 345,375 365,335 C385,295 375,240 345,205
+                 C320,175 290,150 255,140 C225,132 195,125 175,150 Z"
+              fill="url(#meatGrad)" stroke="#3E0F18" stroke-width="2"/>
+
+        <path d="M175,150 C205,132 225,132 255,140 C290,150 320,175 345,205
+                 C352,213 358,222 362,232 C330,205 290,180 250,168
+                 C215,158 190,155 175,150 Z"
+              fill="#F1E3D3" opacity="0.9"/>
+
+        <path d="M195,220 C230,235 260,255 300,270" stroke="#F4C9CE" stroke-width="3" fill="none" opacity="0.55" stroke-linecap="round"/>
+        <path d="M185,260 C220,270 260,290 310,300" stroke="#F4C9CE" stroke-width="2.5" fill="none" opacity="0.45" stroke-linecap="round"/>
+        <path d="M210,310 C245,320 280,330 320,335" stroke="#F4C9CE" stroke-width="2.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+
+        <g transform="translate(120,340) rotate(-15)">
+            <line x1="0" y1="0" x2="70" y2="-10" stroke="#4C6B3A" stroke-width="2.5" stroke-linecap="round"/>
+            <ellipse cx="12" cy="-4" rx="6" ry="2.4" fill="#5C7C46" transform="rotate(-20 12 -4)"/>
+            <ellipse cx="24" cy="-6" rx="6" ry="2.4" fill="#5C7C46" transform="rotate(-15 24 -6)"/>
+            <ellipse cx="36" cy="-8" rx="6" ry="2.4" fill="#5C7C46" transform="rotate(-10 36 -8)"/>
+            <ellipse cx="48" cy="-9" rx="6" ry="2.4" fill="#5C7C46" transform="rotate(-5 48 -9)"/>
+            <ellipse cx="16" cy="2" rx="6" ry="2.4" fill="#4C6B3A" transform="rotate(20 16 2)"/>
+            <ellipse cx="28" cy="1" rx="6" ry="2.4" fill="#4C6B3A" transform="rotate(15 28 1)"/>
+            <ellipse cx="40" cy="0" rx="6" ry="2.4" fill="#4C6B3A" transform="rotate(10 40 0)"/>
+        </g>
+
+        <circle cx="370" cy="330" r="4" fill="#2A2A2A"/>
+        <circle cx="382" cy="342" r="3.5" fill="#2A2A2A"/>
+        <circle cx="360" cy="350" r="3" fill="#2A2A2A"/>
+        <circle cx="392" cy="320" r="3" fill="#2A2A2A"/>
+
+        <circle cx="140" cy="200" r="2.5" fill="#FFFFFF" opacity="0.9"/>
+        <circle cx="150" cy="212" r="2" fill="#FFFFFF" opacity="0.8"/>
+        <circle cx="132" cy="220" r="1.8" fill="#FFFFFF" opacity="0.7"/>
+    </svg>
+    """
+
     st.markdown(
         f"""
         <style>
         .tgi-hero {{
             background: linear-gradient(135deg, {NAVY} 0%, {NAVY_SOFT} 100%);
-            padding: 56px 48px;
+            padding: 0;
             margin: -1rem -1rem 32px -1rem;
             color: #F5F3EE;
+            border-top: 5px solid {AMBER};
+            display: flex;
+            align-items: center;
+            overflow: hidden;
         }}
-        .tgi-hero img {{ height: 46px; margin-bottom: 28px; }}
-        .tgi-hero h1 {{
-            font-size: 40px; font-weight: 800; line-height: 1.15;
-            margin: 0 0 18px 0; color: #FFFFFF;
+        .tgi-hero-media {{
+            flex: 0 0 42%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }}
-        .tgi-hero h1 span {{ color: {AMBER}; }}
-        .tgi-hero p {{
-            font-size: 16px; max-width: 640px; color: #D7D4C8; line-height: 1.6;
+        .tgi-hero-media svg {{ width: 100%; max-width: 320px; }}
+        .tgi-hero-text {{
+            flex: 1 1 58%;
+            padding: 48px 56px 48px 8px;
+        }}
+        .tgi-hero-text img {{ height: 40px; margin-bottom: 22px; }}
+        .tgi-hero-text h1 {{
+            font-size: 44px; font-weight: 800; line-height: 1.12;
+            margin: 0; color: #FFFFFF;
+        }}
+        .tgi-hero-text h1 span {{ color: {AMBER}; }}
+        .tgi-hero-text p {{
+            font-size: 15.5px; max-width: 480px; color: #D7D4C8;
+            line-height: 1.65; margin-top: 20px;
         }}
         .tgi-badge {{
             display: inline-block; background: {AMBER}; color: {NAVY};
             font-weight: 700; font-size: 12px; letter-spacing: 1px;
-            text-transform: uppercase; padding: 5px 12px; margin-bottom: 16px;
+            text-transform: uppercase; padding: 5px 12px; margin-bottom: 18px;
         }}
+        .tgi-accent {{ display: flex; align-items: center; gap: 8px; margin-top: 24px; }}
+        .tgi-accent .dash {{ width: 18px; height: 3px; background: #FFFFFF; }}
+        .tgi-accent .bar {{ width: 70px; height: 3px; background: {AMBER}; }}
         .tgi-section-title {{
             font-size: 26px; font-weight: 700; color: {NAVY}; margin-bottom: 6px;
         }}
@@ -678,16 +760,23 @@ def page_profil_perusahaan():
         .tgi-footer a {{ color: {AMBER}; text-decoration: none; }}
         @media (max-width: 900px) {{
             .tgi-stats-wrap, .tgi-grid {{ grid-template-columns: 1fr; }}
+            .tgi-hero {{ flex-direction: column; }}
+            .tgi-hero-media {{ flex-basis: auto; }}
+            .tgi-hero-text {{ padding: 8px 32px 40px 32px; }}
         }}
         </style>
 
         <div class="tgi-hero">
-            {"<img src='data:image/png;base64," + logo_b64 + "'/>" if logo_b64 else ""}
-            <div class="tgi-badge">PT Tanaka Graha Indonesia</div>
-            <h1>Empower People,<br/><span>Enrich Lives.</span></h1>
-            <p>Lebih dari sekadar mengirimkan produk berkualitas, kami berkomitmen
-            memberikan pengalaman terbaik dan menjaga performa yang konsisten dalam
-            setiap layanan kami.</p>
+            <div class="tgi-hero-media">{steak_svg}</div>
+            <div class="tgi-hero-text">
+                {"<img src='data:image/png;base64," + logo_b64 + "'/>" if logo_b64 else ""}
+                <div class="tgi-badge">PT Tanaka Graha Indonesia</div>
+                <h1>Empower<br/>People,<br/><span>Enrich Lives.</span></h1>
+                <div class="tgi-accent"><span class="dash"></span><span class="bar"></span></div>
+                <p>Lebih dari sekadar mengirimkan produk berkualitas, kami berkomitmen
+                memberikan pengalaman terbaik dan menjaga performa yang konsisten dalam
+                setiap layanan kami.</p>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
