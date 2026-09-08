@@ -8,6 +8,7 @@ Cara menjalankan:
     streamlit run app.py
 """
 
+import base64
 import os
 import uuid
 from datetime import date
@@ -33,11 +34,80 @@ STATUSES = ["Pesanan Masuk", "Diproses", "Dikirim", "Selesai"]
 STATUS_COLOR = {
     "Pesanan Masuk": "#B7791F",
     "Diproses": "#2C5F8A",
-    "Dikirim": "#D98E2C",
+    "Dikirim": "#FBAF43",
     "Selesai": "#3F6B33",
 }
 
+# Brand colors (diambil dari Logo-TGI.png)
+NAVY = "#1E2442"
+AMBER = "#FBAF43"
+NAVY_SOFT = "#2A3357"
+CREAM = "#F7F5F1"
+
+LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo-tgi.png")
+
+COMPANY = {
+    "name": "PT Tanaka Graha Indonesia",
+    "location": "Jakarta – Indonesia",
+    "address": "Jl. Meruya Ilir Raya No.3, Meruya Utara, Kec. Kembangan, "
+                "Kota Jakarta Barat, Daerah Khusus Ibukota Jakarta 11630",
+    "email": "tanakagraha.id@gmail.com",
+    "instagram": "https://www.instagram.com/tanakagraha/",
+}
+
+STATS = [
+    ("4 Tahun", "Pengalaman menghadirkan kebahagiaan bagi pelanggan."),
+    ("100%", "Dedikasi menyediakan solusi terbaik untuk setiap kebutuhan pelanggan."),
+    ("200+", "Klien yang puas dan senang bekerja sama dengan kami."),
+]
+
+WHY_US = [
+    ("🏆", "Best Brand", "Sebagai distributor daging sapi dan seafood di Indonesia, kami selalu menjaga kualitas produk demi kepuasan pelanggan."),
+    ("☑️", "Halal Certified", "Mulai dari proses penyembelihan, penyimpanan, pemotongan, hingga pengemasan — seluruhnya dijamin halal."),
+    ("⚡", "Quick Process", "Pesanan diproses dengan cepat sesuai preferensi dan kebutuhan pelanggan."),
+    ("💎", "Premium Quality", "Semua produk dijamin sesuai label dari supplier kami, terutama untuk daging impor."),
+    ("🏷️", "Affordable Price", "Harga mulai dari Rp 40.000 tanpa minimum order."),
+    ("💡", "Innovative", "Terus berinovasi memperkenalkan produk dan varian baru melalui riset dan pengembangan."),
+]
+
+SERVICES = [
+    ("🏬", "Online & Offline Store", "Terinspirasi dari Australia Meat Emporium, menghadirkan konsep toko daging dengan gaya yang segar dan modern."),
+    ("❄️", "Storage", "Menjaga kondisi cold storage terbaik pada suhu standar -18°C hingga -20°C sebagai importir dan distributor."),
+    ("🚛", "Transportation", "Pengiriman dari gudang ke mitra outlet menggunakan reefer truck dengan kontrol suhu standar untuk menjaga kualitas produk."),
+]
+
 st.set_page_config(page_title="TGI WMS", page_icon="📦", layout="wide")
+
+st.markdown(
+    f"""
+    <style>
+    [data-testid="stSidebar"] {{
+        background-color: {NAVY};
+    }}
+    [data-testid="stSidebar"] * {{
+        color: #EDE9DF;
+    }}
+    [data-testid="stSidebar"] hr {{
+        border-color: {NAVY_SOFT};
+    }}
+    [data-testid="stSidebar"] [data-baseweb="radio"] label {{
+        color: #EDE9DF !important;
+    }}
+    div.stButton > button[kind="primary"] {{
+        background-color: {AMBER};
+        border-color: {AMBER};
+        color: {NAVY};
+        font-weight: 600;
+    }}
+    div.stButton > button[kind="primary"]:hover {{
+        background-color: #E89B2B;
+        border-color: #E89B2B;
+        color: {NAVY};
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------------------------------------------------------------------------
 # Helper baca / tulis CSV
@@ -105,24 +175,20 @@ def next_product_id(products: pd.DataFrame) -> str:
 # Sidebar navigasi
 # ---------------------------------------------------------------------------
 
+if os.path.exists(LOGO_PATH):
+    st.sidebar.image(LOGO_PATH, use_container_width=True)
+else:
+    st.sidebar.markdown("### TGI Warehouse")
 st.sidebar.markdown(
-    """
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <div style="background:#D98E2C;color:#1C2B33;font-weight:700;
-                    padding:6px 10px;font-size:13px;">TGI</div>
-        <div>
-            <div style="font-weight:600;font-size:14px;color:#1C2B33;">TGI Warehouse</div>
-            <div style="font-size:11px;color:#7A7264;">Management System</div>
-        </div>
-    </div>
-    """,
+    "<div style='letter-spacing:1px;font-size:11px;color:#B9AE9B;"
+    "text-transform:uppercase;margin-top:-6px;'>Warehouse Management System</div>",
     unsafe_allow_html=True,
 )
 st.sidebar.divider()
 
 page = st.sidebar.radio(
     "Menu",
-    ["Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang"],
+    ["Profil Perusahaan", "Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang"],
     label_visibility="collapsed",
 )
 
@@ -540,10 +606,195 @@ def page_master_barang():
 
 
 # ---------------------------------------------------------------------------
+# Halaman: Profil Perusahaan
+# ---------------------------------------------------------------------------
+
+def _img_b64(path: str) -> str:
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+def page_profil_perusahaan():
+    logo_b64 = _img_b64(LOGO_PATH) if os.path.exists(LOGO_PATH) else ""
+
+    st.markdown(
+        f"""
+        <style>
+        .tgi-hero {{
+            background: linear-gradient(135deg, {NAVY} 0%, {NAVY_SOFT} 100%);
+            padding: 56px 48px;
+            margin: -1rem -1rem 32px -1rem;
+            color: #F5F3EE;
+        }}
+        .tgi-hero img {{ height: 46px; margin-bottom: 28px; }}
+        .tgi-hero h1 {{
+            font-size: 40px; font-weight: 800; line-height: 1.15;
+            margin: 0 0 18px 0; color: #FFFFFF;
+        }}
+        .tgi-hero h1 span {{ color: {AMBER}; }}
+        .tgi-hero p {{
+            font-size: 16px; max-width: 640px; color: #D7D4C8; line-height: 1.6;
+        }}
+        .tgi-badge {{
+            display: inline-block; background: {AMBER}; color: {NAVY};
+            font-weight: 700; font-size: 12px; letter-spacing: 1px;
+            text-transform: uppercase; padding: 5px 12px; margin-bottom: 16px;
+        }}
+        .tgi-section-title {{
+            font-size: 26px; font-weight: 700; color: {NAVY}; margin-bottom: 6px;
+        }}
+        .tgi-section-sub {{
+            color: #7A7264; font-size: 14.5px; margin-bottom: 26px; max-width: 640px;
+        }}
+        .tgi-stats-wrap {{
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+            margin: 8px 0 44px 0;
+        }}
+        .tgi-stat {{
+            background: {CREAM}; border-left: 4px solid {AMBER};
+            padding: 20px 22px;
+        }}
+        .tgi-stat .num {{
+            font-size: 30px; font-weight: 800; color: {NAVY}; font-family: monospace;
+        }}
+        .tgi-stat .desc {{ font-size: 13px; color: #7A7264; margin-top: 4px; }}
+        .tgi-grid {{
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+            margin-bottom: 44px;
+        }}
+        .tgi-card {{
+            background: #FFFFFF; border: 1px solid #E7E2D4; padding: 22px;
+            transition: box-shadow .15s;
+        }}
+        .tgi-card:hover {{ box-shadow: 0 4px 18px rgba(30,36,66,0.08); }}
+        .tgi-card .icon {{ font-size: 26px; margin-bottom: 10px; }}
+        .tgi-card .title {{ font-weight: 700; color: {NAVY}; font-size: 15.5px; margin-bottom: 6px; }}
+        .tgi-card .body {{ font-size: 13.5px; color: #7A7264; line-height: 1.55; }}
+        .tgi-footer {{
+            background: {NAVY}; color: #C9C5B8; padding: 32px 40px;
+            margin: 12px -1rem -1rem -1rem; font-size: 13.5px; line-height: 1.7;
+        }}
+        .tgi-footer b {{ color: #FFFFFF; }}
+        .tgi-footer a {{ color: {AMBER}; text-decoration: none; }}
+        @media (max-width: 900px) {{
+            .tgi-stats-wrap, .tgi-grid {{ grid-template-columns: 1fr; }}
+        }}
+        </style>
+
+        <div class="tgi-hero">
+            {"<img src='data:image/png;base64," + logo_b64 + "'/>" if logo_b64 else ""}
+            <div class="tgi-badge">PT Tanaka Graha Indonesia</div>
+            <h1>Empower People,<br/><span>Enrich Lives.</span></h1>
+            <p>Lebih dari sekadar mengirimkan produk berkualitas, kami berkomitmen
+            memberikan pengalaman terbaik dan menjaga performa yang konsisten dalam
+            setiap layanan kami.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # --- Tentang Kami -------------------------------------------------------
+    left, right = st.columns([1.3, 1])
+    with left:
+        st.markdown('<div class="tgi-section-title">Tentang Kami</div>', unsafe_allow_html=True)
+        st.markdown(
+            """
+            <p style="color:#4A4638;font-size:14.5px;line-height:1.7;max-width:560px;">
+            PT Tanaka Graha Indonesia berawal sebagai perusahaan distributor dan retail
+            yang menyediakan berbagai produk <i>chilled</i> dan <i>frozen</i>, termasuk
+            daging sapi premium, seafood, dan produk lainnya dari berbagai negara.<br/><br/>
+            Dengan dedikasi tinggi, kami berkomitmen menghadirkan produk berkualitas
+            dengan harga terjangkau, memperkaya kehidupan, dan memberdayakan
+            masyarakat.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+    with right:
+        st.markdown(
+            f"""
+            <div style="background:{CREAM};padding:22px 24px;border-left:4px solid {AMBER};">
+                <div style="font-weight:700;color:{NAVY};font-size:15px;margin-bottom:10px;">
+                    {COMPANY['name']}
+                </div>
+                <div style="font-size:13.5px;color:#4A4638;line-height:1.7;">
+                    {COMPANY['location']}<br/>
+                    {COMPANY['address']}<br/><br/>
+                    ✉️ {COMPANY['email']}<br/>
+                    📷 <a href="{COMPANY['instagram']}" style="color:{NAVY};font-weight:600;">
+                        Instagram @tanakagraha</a>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # --- Statistik ------------------------------------------------------------
+    stats_html = "".join(
+        f"""<div class="tgi-stat">
+                <div class="num">{num}</div>
+                <div class="desc">{desc}</div>
+            </div>"""
+        for num, desc in STATS
+    )
+    st.markdown(f'<div class="tgi-stats-wrap">{stats_html}</div>', unsafe_allow_html=True)
+
+    # --- Why Us -----------------------------------------------------------
+    st.markdown('<div class="tgi-section-title">Why Us?</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tgi-section-sub">Lebih dari sekadar mengirimkan produk '
+        'berkualitas, kami menjaga performa yang konsisten di setiap layanan.</div>',
+        unsafe_allow_html=True,
+    )
+    why_html = "".join(
+        f"""<div class="tgi-card">
+                <div class="icon">{icon}</div>
+                <div class="title">{title}</div>
+                <div class="body">{body}</div>
+            </div>"""
+        for icon, title, body in WHY_US
+    )
+    st.markdown(f'<div class="tgi-grid">{why_html}</div>', unsafe_allow_html=True)
+
+    # --- Layanan Kami -------------------------------------------------------
+    st.markdown('<div class="tgi-section-title">Layanan Kami</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tgi-section-sub">Menyediakan berbagai produk daging dan '
+        'seafood premium untuk kebutuhan retail online maupun offline.</div>',
+        unsafe_allow_html=True,
+    )
+    svc_html = "".join(
+        f"""<div class="tgi-card">
+                <div class="icon">{icon}</div>
+                <div class="title">{title}</div>
+                <div class="body">{body}</div>
+            </div>"""
+        for icon, title, body in SERVICES
+    )
+    st.markdown(f'<div class="tgi-grid">{svc_html}</div>', unsafe_allow_html=True)
+
+    # --- Footer ---------------------------------------------------------------
+    st.markdown(
+        f"""
+        <div class="tgi-footer">
+            <b>{COMPANY['name']}</b><br/>
+            {COMPANY['location']}<br/>
+            {COMPANY['address']}<br/><br/>
+            {COMPANY['email']} &nbsp;·&nbsp;
+            <a href="{COMPANY['instagram']}">Instagram</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Router
 # ---------------------------------------------------------------------------
 
-if page == "Dashboard":
+if page == "Profil Perusahaan":
+    page_profil_perusahaan()
+elif page == "Dashboard":
     page_dashboard()
 elif page == "Input Pesanan":
     page_input_pesanan()

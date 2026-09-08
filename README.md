@@ -5,7 +5,12 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
 
 ## Fitur
 
-- **Dashboard** — Total Pesanan dan Stock Tersedia, pesanan terbaru, stock menipis.
+- **Profil Perusahaan** — halaman landing berisi profil PT Tanaka Graha Indonesia
+  (hero, tentang kami, statistik, Why Us, layanan) dengan tampilan yang selaras
+  dengan [tanakagraha.id](https://tanakagraha.id/), memakai logo dan skema warna
+  navy (`#1E2442`) + amber (`#FBAF43`) dari brand TGI.
+- **Dashboard** — Total Pesanan dan Stock Tersedia, serta grafik: Pesanan per
+  Status, Trend Pesanan Harian, Stock per Barang, dan Item Terlaris.
 - **Input Pesanan** — pilih customer (alamat otomatis terisi), tanggal pesanan,
   alamat kirim, dan detail item pesanan (multi-baris, validasi stock).
 - **Daftar Pesanan** — cari & filter pesanan, lihat detail item, ubah status
@@ -17,13 +22,17 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
 
 ```
 tgi_wms/
-├── app.py                 # aplikasi Streamlit utama
+├── app.py                   # aplikasi Streamlit utama
 ├── requirements.txt
+├── .streamlit/
+│   └── config.toml          # tema warna (navy & amber sesuai brand TGI)
+├── assets/
+│   └── logo-tgi.png         # logo perusahaan
 ├── data/
-│   ├── customers.csv      # master customer
-│   ├── products.csv       # master barang & stock
-│   ├── orders.csv         # header pesanan (id, customer, tanggal, alamat, status)
-│   └── order_items.csv    # detail item tiap pesanan (order_id, product_id, qty)
+│   ├── customers.csv        # master customer
+│   ├── products.csv         # master barang & stock
+│   ├── orders.csv           # header pesanan (id, customer, tanggal, alamat, status)
+│   └── order_items.csv      # detail item tiap pesanan (order_id, product_id, qty)
 ```
 
 Semua perubahan (pesanan baru, ubah status, ubah stock/harga, tambah/hapus barang)
