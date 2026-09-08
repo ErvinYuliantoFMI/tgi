@@ -1,0 +1,7 @@
+product_id,name,unit,stock,price
+P1,Kardus Box Besar,pcs,500,15000
+P2,Kardus Box Kecil,pcs,800,8000
+P3,Plastik Wrap,roll,300,25000
+P4,Palet Kayu,unit,150,120000
+P5,Botol Kaca 500ml,pcs,1200,3500
+P6,Label Sticker,lembar,2000,500
