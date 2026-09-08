@@ -180,7 +180,7 @@ if os.path.exists(LOGO_PATH):
 else:
     st.sidebar.markdown("### TGI Warehouse")
 st.sidebar.markdown(
-    "<div style='letter-spacing:1px;font-size:11px;color:#B9AE9B;"
+    "<div style='letter-spacing:1px;font-size:11px;color:#FFFFFF;"
     "text-transform:uppercase;margin-top:-6px;'>Warehouse Management System</div>",
     unsafe_allow_html=True,
 )
