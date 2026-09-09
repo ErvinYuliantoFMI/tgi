@@ -9,8 +9,10 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
   (hero, tentang kami, statistik, Why Us, layanan) dengan tampilan yang selaras
   dengan [tanakagraha.id](https://tanakagraha.id/), memakai logo dan skema warna
   navy (`#1E2442`) + amber (`#FBAF43`) dari brand TGI.
-- **Dashboard** — Total Pesanan dan Stock Tersedia, serta grafik: Pesanan per
-  Status, Trend Pesanan Harian, Stock per Barang, dan Item Terlaris.
+- **Dashboard** — kartu Total Pesanan & Stock Tersedia dengan background
+  gradient (navy & amber), serta grafik: donut Pesanan per Status, area chart
+  Trend Pesanan Harian, lollipop chart Stock per Barang, dan bar gradient
+  Item Terlaris.
 - **Input Pesanan** — pilih customer (alamat otomatis terisi), tanggal pesanan,
   alamat kirim, dan detail item pesanan (multi-baris, validasi stock).
 - **Daftar Pesanan** — cari & filter pesanan, lihat detail item, ubah status
@@ -22,17 +24,19 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
 
 ```
 tgi_wms/
-├── app.py                   # aplikasi Streamlit utama
+├── app.py                      # aplikasi Streamlit utama
 ├── requirements.txt
 ├── .streamlit/
-│   └── config.toml          # tema warna (navy & amber sesuai brand TGI)
+│   └── config.toml             # tema warna (navy & amber sesuai brand TGI)
 ├── assets/
-│   └── logo-tgi.png         # logo perusahaan
+│   ├── logo-tgi.png            # logo berwarna (untuk latar terang)
+│   ├── logo-tgi-putih.png      # logo putih (untuk latar navy — sidebar & hero)
+│   └── logo-icon.png           # ikon asterisk saja (watermark dekoratif)
 ├── data/
-│   ├── customers.csv        # master customer
-│   ├── products.csv         # master barang & stock
-│   ├── orders.csv           # header pesanan (id, customer, tanggal, alamat, status)
-│   └── order_items.csv      # detail item tiap pesanan (order_id, product_id, qty)
+│   ├── customers.csv           # master customer
+│   ├── products.csv            # master barang & stock
+│   ├── orders.csv              # header pesanan (id, customer, tanggal, alamat, status)
+│   └── order_items.csv         # detail item tiap pesanan (order_id, product_id, qty)
 ```
 
 Semua perubahan (pesanan baru, ubah status, ubah stock/harga, tambah/hapus barang)

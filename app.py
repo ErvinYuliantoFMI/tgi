@@ -15,6 +15,7 @@ from datetime import date
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 # ---------------------------------------------------------------------------
@@ -45,6 +46,7 @@ NAVY_SOFT = "#2A3357"
 CREAM = "#F7F5F1"
 
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo-tgi.png")
+LOGO_WHITE_PATH = os.path.join(BASE_DIR, "assets", "logo-tgi-putih.png")
 ICON_PATH = os.path.join(BASE_DIR, "assets", "logo-icon.png")
 
 COMPANY = {
@@ -176,7 +178,9 @@ def next_product_id(products: pd.DataFrame) -> str:
 # Sidebar navigasi
 # ---------------------------------------------------------------------------
 
-if os.path.exists(LOGO_PATH):
+if os.path.exists(LOGO_WHITE_PATH):
+    st.sidebar.image(LOGO_WHITE_PATH, use_container_width=True)
+elif os.path.exists(LOGO_PATH):
     st.sidebar.image(LOGO_PATH, use_container_width=True)
 else:
     st.sidebar.markdown("### TGI Warehouse")
@@ -222,16 +226,64 @@ def page_dashboard():
     total_pesanan = len(orders)
     stock_tersedia = int(products["stock"].sum())
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Total Pesanan", f"{total_pesanan}")
-    with col2:
-        st.metric("Stock Tersedia", f"{stock_tersedia:,} unit".replace(",", "."))
+    # --- KPI cards dengan background -----------------------------------------
+    stock_display = f"{stock_tersedia:,}".replace(",", ".")
+
+    st.markdown(_html(f"""
+    <style>
+    .tgi-kpi-wrap {{
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
+        margin-bottom: 8px;
+    }}
+    .tgi-kpi {{
+        border-radius: 10px; padding: 24px 28px; position: relative;
+        overflow: hidden; box-shadow: 0 6px 18px rgba(30,36,66,0.12);
+    }}
+    .tgi-kpi .glyph {{
+        position: absolute; right: 14px; top: 8px; font-size: 56px; opacity: 0.18;
+    }}
+    .tgi-kpi .label {{
+        font-size: 12.5px; font-weight: 600; letter-spacing: 1px;
+        text-transform: uppercase; position: relative; z-index: 1;
+    }}
+    .tgi-kpi .value {{
+        font-size: 38px; font-weight: 800; font-family: monospace;
+        margin-top: 8px; position: relative; z-index: 1;
+    }}
+    .tgi-kpi-navy {{
+        background: linear-gradient(135deg, {NAVY} 0%, {NAVY_SOFT} 100%);
+        color: #FFFFFF;
+    }}
+    .tgi-kpi-navy .label {{ color: #C7CCDA; }}
+    .tgi-kpi-amber {{
+        background: linear-gradient(135deg, {AMBER} 0%, #E2891F 100%);
+        color: {NAVY};
+    }}
+    .tgi-kpi-amber .label {{ color: #5A3E10; }}
+    @media (max-width: 700px) {{
+        .tgi-kpi-wrap {{ grid-template-columns: 1fr; }}
+    }}
+    </style>
+    <div class="tgi-kpi-wrap">
+        <div class="tgi-kpi tgi-kpi-navy">
+            <div class="glyph">🧾</div>
+            <div class="label">Total Pesanan</div>
+            <div class="value">{total_pesanan}</div>
+        </div>
+        <div class="tgi-kpi tgi-kpi-amber">
+            <div class="glyph">📦</div>
+            <div class="label">Stock Tersedia</div>
+            <div class="value">{stock_display} unit</div>
+        </div>
+    </div>
+    """),
+        unsafe_allow_html=True,
+    )
 
     st.write("")
     row1_left, row1_right = st.columns(2)
 
-    # --- Grafik: Pesanan per Status ---------------------------------------
+    # --- Grafik: Pesanan per Status (donut) ---------------------------------
     with row1_left:
         st.subheader("Pesanan per Status")
         if orders.empty:
@@ -242,18 +294,25 @@ def page_dashboard():
                 .reset_index()
             )
             status_counts.columns = ["status", "jumlah"]
-            fig = px.bar(
-                status_counts, x="status", y="jumlah", color="status",
-                color_discrete_map=STATUS_COLOR, text="jumlah",
+            fig = px.pie(
+                status_counts, names="status", values="jumlah", hole=0.6,
+                color="status", color_discrete_map=STATUS_COLOR,
             )
-            fig.update_traces(textposition="outside", showlegend=False)
+            fig.update_traces(
+                textposition="outside", textinfo="label+value",
+                marker=dict(line=dict(color="#FFFFFF", width=2)),
+            )
             fig.update_layout(
-                **CHART_LAYOUT, showlegend=False,
-                xaxis_title=None, yaxis_title="Jumlah Pesanan",
+                **{**CHART_LAYOUT, "margin": dict(l=10, r=10, t=30, b=10)},
+                showlegend=False,
+                annotations=[dict(
+                    text=f"<b>{total_pesanan}</b><br>Pesanan", x=0.5, y=0.5,
+                    font=dict(size=16, color=NAVY), showarrow=False,
+                )],
             )
             st.plotly_chart(fig, use_container_width=True)
 
-    # --- Grafik: Trend Pesanan Harian --------------------------------------
+    # --- Grafik: Trend Pesanan Harian (area halus) --------------------------
     with row1_right:
         st.subheader("Trend Pesanan Harian")
         if orders.empty:
@@ -262,8 +321,13 @@ def page_dashboard():
             trend = orders.groupby("order_date").size().reset_index(name="jumlah")
             trend["order_date"] = pd.to_datetime(trend["order_date"])
             trend = trend.sort_values("order_date")
-            fig = px.line(trend, x="order_date", y="jumlah", markers=True)
-            fig.update_traces(line_color="#2C5F8A", marker=dict(size=8, color="#2C5F8A"))
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=trend["order_date"], y=trend["jumlah"],
+                mode="lines+markers", line=dict(color="#2C5F8A", width=3, shape="spline"),
+                marker=dict(size=9, color="#2C5F8A", line=dict(color="#FFFFFF", width=1.5)),
+                fill="tozeroy", fillcolor="rgba(44,95,138,0.15)",
+            ))
             fig.update_layout(
                 **CHART_LAYOUT, xaxis_title=None, yaxis_title="Jumlah Pesanan",
             )
@@ -271,7 +335,7 @@ def page_dashboard():
 
     row2_left, row2_right = st.columns(2)
 
-    # --- Grafik: Stock per Barang -------------------------------------------
+    # --- Grafik: Stock per Barang (lollipop) --------------------------------
     with row2_left:
         st.subheader("Stock per Barang")
         if products.empty:
@@ -279,16 +343,26 @@ def page_dashboard():
         else:
             stock_df = products[["name", "stock"]].sort_values("stock")
             colors = ["#A3402E" if s < 200 else "#1F6F5C" for s in stock_df["stock"]]
-            fig = px.bar(
-                stock_df, x="stock", y="name", orientation="h", text="stock",
-            )
-            fig.update_traces(marker_color=colors, textposition="outside")
+            fig = go.Figure()
+            for _, row in stock_df.iterrows():
+                color = "#A3402E" if row["stock"] < 200 else "#1F6F5C"
+                fig.add_shape(
+                    type="line", x0=0, x1=row["stock"], y0=row["name"], y1=row["name"],
+                    line=dict(color=color, width=3),
+                )
+            fig.add_trace(go.Scatter(
+                x=stock_df["stock"], y=stock_df["name"], mode="markers+text",
+                marker=dict(size=16, color=colors, line=dict(color="#FFFFFF", width=1.5)),
+                text=stock_df["stock"], textposition="middle right",
+                textfont=dict(size=11, color="#1C2B33"),
+            ))
             fig.update_layout(
-                **CHART_LAYOUT, xaxis_title="Stock", yaxis_title=None,
+                **CHART_LAYOUT, xaxis_title="Stock", yaxis_title=None, showlegend=False,
             )
+            fig.update_xaxes(range=[0, stock_df["stock"].max() * 1.25])
             st.plotly_chart(fig, use_container_width=True)
 
-    # --- Grafik: Item Terlaris ----------------------------------------------
+    # --- Grafik: Item Terlaris (bar gradient bulat) -------------------------
     with row2_right:
         st.subheader("Item Terlaris (berdasarkan Qty Dipesan)")
         if order_items.empty:
@@ -297,15 +371,19 @@ def page_dashboard():
             item_qty = (
                 order_items.groupby("product_id")["qty"].sum().reset_index()
                 .merge(products[["product_id", "name"]], on="product_id", how="left")
-                .sort_values("qty", ascending=False).head(5)
+                .sort_values("qty", ascending=True).tail(5)
             )
-            fig = px.bar(
-                item_qty, x="name", y="qty", text="qty",
-                color_discrete_sequence=["#D98E2C"],
-            )
-            fig.update_traces(textposition="outside")
+            amber_shades = ["#FDE3B8", "#FBCB80", "#FBAF43", "#E2891F", "#B96B15"]
+            n = len(item_qty)
+            shades = amber_shades[-n:] if n <= len(amber_shades) else amber_shades * n
+            fig = go.Figure(go.Bar(
+                x=item_qty["qty"], y=item_qty["name"], orientation="h",
+                marker=dict(color=shades[:n], cornerradius=8,
+                            line=dict(color="#FFFFFF", width=1)),
+                text=item_qty["qty"], textposition="outside",
+            ))
             fig.update_layout(
-                **CHART_LAYOUT, xaxis_title=None, yaxis_title="Total Qty Dipesan",
+                **CHART_LAYOUT, xaxis_title="Total Qty Dipesan", yaxis_title=None,
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -627,7 +705,9 @@ def _html(s: str) -> str:
 
 
 def page_profil_perusahaan():
-    logo_b64 = _img_b64(LOGO_PATH) if os.path.exists(LOGO_PATH) else ""
+    logo_b64 = _img_b64(LOGO_WHITE_PATH) if os.path.exists(LOGO_WHITE_PATH) else (
+        _img_b64(LOGO_PATH) if os.path.exists(LOGO_PATH) else ""
+    )
     icon_b64 = _img_b64(ICON_PATH) if os.path.exists(ICON_PATH) else ""
 
     st.markdown(_html(f"""
