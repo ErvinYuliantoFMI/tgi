@@ -829,7 +829,6 @@ def page_profil_perusahaan():
         {"<img class='tgi-hero-watermark' src='data:image/png;base64," + icon_b64 + "'/>" if icon_b64 else ""}
         <div class="tgi-hero-inner">
             {"<img class='tgi-logo' src='data:image/png;base64," + logo_b64 + "'/>" if logo_b64 else ""}
-            <div class="tgi-badge">PT Tanaka Graha Indonesia</div>
             <h1>Empower People,<br/><span>Enrich Lives.</span></h1>
             <div class="tgi-accent"><span class="dash"></span><span class="bar"></span></div>
             <p>Lebih dari sekadar mengirimkan produk berkualitas, kami berkomitmen
