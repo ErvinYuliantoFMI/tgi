@@ -399,11 +399,16 @@ def page_dashboard():
     # --- Grafik: Item Terlaris (bar gradient bulat) -------------------------
     with row2_right:
         st.subheader("Item Terlaris (berdasarkan Qty Dipesan)")
-        if order_items.empty:
+        active_items = order_items.merge(
+            orders[["order_id", "status"]], on="order_id", how="left"
+        )
+        active_items = active_items[active_items["status"] != "Dibatalkan"]
+
+        if active_items.empty:
             st.info("Belum ada item pesanan.")
         else:
             item_qty = (
-                order_items.groupby("product_id")["qty"].sum().reset_index()
+                active_items.groupby("product_id")["qty"].sum().reset_index()
                 .merge(products[["product_id", "name"]], on="product_id", how="left")
                 .sort_values("qty", ascending=True).tail(5)
             )
@@ -420,6 +425,7 @@ def page_dashboard():
                 **CHART_LAYOUT, xaxis_title="Total Qty Dipesan", yaxis_title=None,
             )
             st.plotly_chart(fig, use_container_width=True)
+            st.caption("Pesanan berstatus \"Dibatalkan\" tidak dihitung.")
 
     st.write("")
     st.subheader("Pesanan Terbaru")
