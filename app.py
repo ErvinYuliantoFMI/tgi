@@ -97,6 +97,9 @@ st.markdown(
     [data-testid="stSidebar"] [data-baseweb="radio"] label {{
         color: #EDE9DF !important;
     }}
+    [data-testid="stSidebar"] iframe {{
+        background-color: {NAVY} !important;
+    }}
     div.stButton > button[kind="primary"] {{
         background-color: {AMBER};
         border-color: {AMBER};
@@ -202,20 +205,28 @@ with st.sidebar:
         icons=MENU_ICONS,
         default_index=0,
         styles={
-            "container": {"padding": "0", "background-color": "transparent"},
-            "icon": {"color": AMBER, "font-size": "16px"},
+            "container": {
+                "padding": "0",
+                "background-color": NAVY,
+            },
+            "icon": {"color": "#8D95A6", "font-size": "15px"},
             "nav-link": {
                 "font-size": "14.5px",
                 "text-align": "left",
                 "margin": "3px 0",
                 "padding": "10px 14px",
-                "color": "#D7D4C8",
+                "color": "#C7CCDA",
+                "background-color": "transparent",
                 "border-radius": "6px",
             },
-            "nav-link:hover": {"background-color": NAVY_SOFT, "color": "#FFFFFF"},
-            "nav-link-selected": {
-                "background-color": NAVY_SOFT,
+            "nav-link:hover": {
+                "background-color": "rgba(255,255,255,0.06)",
                 "color": "#FFFFFF",
+            },
+            "nav-link-selected": {
+                "background-color": "rgba(251,175,67,0.14)",
+                "color": "#FFFFFF",
+                "icon-color": AMBER,
                 "font-weight": "600",
                 "border-left": f"3px solid {AMBER}",
                 "border-radius": "6px",
