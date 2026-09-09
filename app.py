@@ -157,6 +157,26 @@ def save_order_items(df: pd.DataFrame):
     df.to_csv(ORDER_ITEMS_CSV, index=False)
 
 
+def adjust_stock_for_order(order_id: str, sign: int):
+    """Ubah stock di products.csv untuk semua item pada satu pesanan.
+
+    sign = -1 -> stock dikurangi (pesanan baru / dibuat ulang dari batal)
+    sign = +1 -> stock dikembalikan (pesanan dibatalkan)
+    """
+    order_items = load_order_items()
+    products = load_products()
+
+    items = order_items[order_items["order_id"] == order_id]
+    for _, it in items.iterrows():
+        mask = products["product_id"] == it["product_id"]
+        if mask.any():
+            products.loc[mask, "stock"] = (
+                products.loc[mask, "stock"] + sign * int(it["qty"])
+            ).clip(lower=0)
+
+    save_products(products)
+
+
 def rupiah(n) -> str:
     return "Rp " + f"{n:,.0f}".replace(",", ".")
 
@@ -576,6 +596,8 @@ def page_input_pesanan():
             order_items = pd.concat([order_items, new_items], ignore_index=True)
             save_order_items(order_items)
 
+            adjust_stock_for_order(new_id, sign=-1)
+
             st.session_state.order_items = [{"key": str(uuid.uuid4()), "product_id": "", "qty": 1}]
             st.success(f"Pesanan {new_id} berhasil disimpan.")
             st.rerun()
@@ -647,7 +669,21 @@ def page_daftar_pesanan():
                 if new_status != o["status"]:
                     orders.loc[orders["order_id"] == o["order_id"], "status"] = new_status
                     save_orders(orders)
-                    st.success(f"Status {o['order_id']} diubah menjadi \"{new_status}\"")
+
+                    if new_status == "Dibatalkan" and o["status"] != "Dibatalkan":
+                        adjust_stock_for_order(o["order_id"], sign=+1)
+                        st.success(
+                            f"Pesanan {o['order_id']} dibatalkan — stock item "
+                            f"terkait dikembalikan."
+                        )
+                    elif o["status"] == "Dibatalkan" and new_status != "Dibatalkan":
+                        adjust_stock_for_order(o["order_id"], sign=-1)
+                        st.success(
+                            f"Pesanan {o['order_id']} diaktifkan kembali — stock "
+                            f"item terkait dikurangi lagi."
+                        )
+                    else:
+                        st.success(f"Status {o['order_id']} diubah menjadi \"{new_status}\"")
                     st.rerun()
 
 
