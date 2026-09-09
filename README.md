@@ -5,6 +5,10 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
 
 ## Fitur
 
+- Menu navigasi di sidebar memakai [`streamlit-option-menu`](https://github.com/victoryhb/streamlit-option-menu)
+  agar tampil sebagai daftar menu dengan ikon (bukan radio button bawaan
+  Streamlit), dengan gaya warna navy & amber yang senada dengan brand.
+
 - **Profil Perusahaan** — halaman landing berisi profil PT Tanaka Graha Indonesia
   (hero, tentang kami, statistik, Why Us, layanan) dengan tampilan yang selaras
   dengan [tanakagraha.id](https://tanakagraha.id/), memakai logo dan skema warna

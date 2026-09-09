@@ -17,6 +17,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from streamlit_option_menu import option_menu
 
 # ---------------------------------------------------------------------------
 # Konfigurasi & path data
@@ -189,17 +190,38 @@ st.sidebar.markdown(
     "text-transform:uppercase;margin-top:-6px;'>Warehouse Management System</div>",
     unsafe_allow_html=True,
 )
-st.sidebar.divider()
+st.sidebar.write("")
 
-page = st.sidebar.radio(
-    "Menu",
-    ["Profil Perusahaan", "Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang"],
-    label_visibility="collapsed",
-)
+MENU_OPTIONS = ["Profil Perusahaan", "Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang"]
+MENU_ICONS = ["building", "speedometer2", "cart-plus-fill", "list-check", "boxes"]
 
-st.sidebar.divider()
-st.sidebar.caption("Gudang Pusat — Cikarang")
-st.sidebar.caption(f"Sumber data: folder `data/` (CSV)")
+with st.sidebar:
+    page = option_menu(
+        menu_title=None,
+        options=MENU_OPTIONS,
+        icons=MENU_ICONS,
+        default_index=0,
+        styles={
+            "container": {"padding": "0", "background-color": "transparent"},
+            "icon": {"color": AMBER, "font-size": "16px"},
+            "nav-link": {
+                "font-size": "14.5px",
+                "text-align": "left",
+                "margin": "3px 0",
+                "padding": "10px 14px",
+                "color": "#D7D4C8",
+                "border-radius": "6px",
+            },
+            "nav-link:hover": {"background-color": NAVY_SOFT, "color": "#FFFFFF"},
+            "nav-link-selected": {
+                "background-color": NAVY_SOFT,
+                "color": "#FFFFFF",
+                "font-weight": "600",
+                "border-left": f"3px solid {AMBER}",
+                "border-radius": "6px",
+            },
+        },
+    )
 
 # ---------------------------------------------------------------------------
 # Halaman: Dashboard
