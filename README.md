@@ -23,6 +23,8 @@ Python (Streamlit) dan menggunakan file CSV sebagai sumber data — tanpa databa
   langsung: `Pesanan Masuk` → `Diproses` → `Dikirim` → `Selesai`.
 - **Master Barang** — tambah barang baru, edit stock/harga langsung di tabel,
   hapus barang.
+- **Games** — mini game "Meat Station Flappy" (HTML5 canvas, mirip Flappy
+  Bird bertema TGI) sebagai selingan santai di dalam aplikasi.
 
 ## Struktur folder
 
@@ -35,7 +37,8 @@ tgi_wms/
 ├── assets/
 │   ├── logo-tgi.png            # logo berwarna (untuk latar terang)
 │   ├── logo-tgi-putih.png      # logo putih (untuk latar navy — sidebar & hero)
-│   └── logo-icon.png           # ikon asterisk saja (watermark dekoratif)
+│   ├── logo-icon.png           # ikon asterisk saja (watermark dekoratif)
+│   └── meat_station_game.html  # mini game "Meat Station Flappy"
 ├── data/
 │   ├── customers.csv           # master customer
 │   ├── products.csv            # master barang & stock

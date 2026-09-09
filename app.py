@@ -17,6 +17,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.components.v1 as components
 from streamlit_option_menu import option_menu
 
 # ---------------------------------------------------------------------------
@@ -50,6 +51,7 @@ CREAM = "#F7F5F1"
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo-tgi.png")
 LOGO_WHITE_PATH = os.path.join(BASE_DIR, "assets", "logo-tgi-putih.png")
 ICON_PATH = os.path.join(BASE_DIR, "assets", "logo-icon.png")
+GAME_HTML_PATH = os.path.join(BASE_DIR, "assets", "meat_station_game.html")
 
 COMPANY = {
     "name": "PT Tanaka Graha Indonesia",
@@ -216,8 +218,8 @@ st.sidebar.markdown(
 )
 st.sidebar.write("")
 
-MENU_OPTIONS = ["Profil Perusahaan", "Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang"]
-MENU_ICONS = ["building", "speedometer2", "cart-plus-fill", "list-check", "boxes"]
+MENU_OPTIONS = ["Profil Perusahaan", "Dashboard", "Input Pesanan", "Daftar Pesanan", "Master Barang", "Games"]
+MENU_ICONS = ["building", "speedometer2", "cart-plus-fill", "list-check", "boxes", "controller"]
 
 with st.sidebar:
     page = option_menu(
@@ -965,6 +967,24 @@ def page_profil_perusahaan():
 
 
 # ---------------------------------------------------------------------------
+# Halaman: Games
+# ---------------------------------------------------------------------------
+
+def page_games():
+    st.title("Games")
+    st.caption("Waktunya istirahat sejenak — main dulu, yuk!")
+
+    if not os.path.exists(GAME_HTML_PATH):
+        st.warning("File game tidak ditemukan di `assets/meat_station_game.html`.")
+        return
+
+    with open(GAME_HTML_PATH, "r", encoding="utf-8") as f:
+        game_html = f.read()
+
+    components.html(game_html, height=760, scrolling=False)
+
+
+# ---------------------------------------------------------------------------
 # Router
 # ---------------------------------------------------------------------------
 
@@ -978,3 +998,5 @@ elif page == "Daftar Pesanan":
     page_daftar_pesanan()
 elif page == "Master Barang":
     page_master_barang()
+elif page == "Games":
+    page_games()
