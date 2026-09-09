@@ -31,13 +31,14 @@ PRODUCTS_CSV = os.path.join(DATA_DIR, "products.csv")
 ORDERS_CSV = os.path.join(DATA_DIR, "orders.csv")
 ORDER_ITEMS_CSV = os.path.join(DATA_DIR, "order_items.csv")
 
-STATUSES = ["Pesanan Masuk", "Diproses", "Dikirim", "Selesai"]
+STATUSES = ["Pesanan Masuk", "Diproses", "Dikirim", "Selesai", "Dibatalkan"]
 
 STATUS_COLOR = {
     "Pesanan Masuk": "#B7791F",
     "Diproses": "#2C5F8A",
     "Dikirim": "#FBAF43",
     "Selesai": "#3F6B33",
+    "Dibatalkan": "#A3402E",
 }
 
 # Brand colors (diambil dari Logo-TGI.png)
